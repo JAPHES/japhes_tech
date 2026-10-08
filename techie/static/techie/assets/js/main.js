@@ -192,6 +192,55 @@
   });
 
   /**
+   * Copy access codes with a secure-context API and a browser fallback
+   */
+  document.querySelectorAll('[data-copy-text]').forEach((copyButton) => {
+    copyButton.addEventListener('click', async () => {
+      const textToCopy = copyButton.dataset.copyText;
+      const buttonLabel = copyButton.querySelector('span');
+      const status = copyButton.parentElement.querySelector('.bizoach-copy-status');
+      const originalLabel = buttonLabel.textContent;
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(textToCopy);
+        } else {
+          const temporaryInput = document.createElement('textarea');
+          temporaryInput.value = textToCopy;
+          temporaryInput.setAttribute('readonly', '');
+          temporaryInput.style.position = 'fixed';
+          temporaryInput.style.opacity = '0';
+          document.body.appendChild(temporaryInput);
+          temporaryInput.select();
+
+          let copyAccepted = false;
+          try {
+            copyAccepted = document.execCommand('copy');
+          } finally {
+            temporaryInput.remove();
+          }
+
+          if (!copyAccepted) {
+            throw new Error('Copy command was not accepted');
+          }
+        }
+
+        copyButton.classList.add('is-copied');
+        buttonLabel.textContent = 'Copied!';
+        status.textContent = 'Early access code copied.';
+      } catch (error) {
+        status.textContent = 'Copy failed. Select the code and copy it manually.';
+      }
+
+      window.setTimeout(() => {
+        copyButton.classList.remove('is-copied');
+        buttonLabel.textContent = originalLabel;
+        status.textContent = '';
+      }, 2500);
+    });
+  });
+
+  /**
    * Keep resume columns balanced until the longer column is expanded
    */
   const resumeColumns = Array.from(document.querySelectorAll('.resume-column'));

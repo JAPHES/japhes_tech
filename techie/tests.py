@@ -188,7 +188,7 @@ class SeoTests(SimpleTestCase):
         self.assertContains(response, 'class="resume-toggle"', count=2)
         self.assertContains(response, 'aria-expanded="false"', count=2)
 
-    def test_resume_includes_bizoach_ambassador_role_and_waitlist_cta(self):
+    def test_resume_includes_bizoach_ambassador_role_and_early_access_cta(self):
         response = self.client.get(reverse("techie:home"), **self.request_options)
         content = response.content.decode()
 
@@ -199,9 +199,14 @@ class SeoTests(SimpleTestCase):
         self.assertContains(response, "Building and growing the BIZOACH campus community.")
         self.assertContains(response, "entrepreneurship and business-building opportunities")
         self.assertContains(response, "Build with Intelligence")
-        self.assertContains(response, "Ready to build with intelligence?")
-        self.assertContains(response, "Join BIZOACH Waitlist")
+        self.assertContains(response, "BIZOACH is Now Live for Early Access!")
+        self.assertContains(response, "Have a business or an idea? Experience BIZOACH")
+        self.assertContains(response, "Access BIZOACH Now")
+        self.assertContains(response, "FOUNDERS-PATHWAY-2026", count=2)
+        self.assertContains(response, 'data-copy-text="FOUNDERS-PATHWAY-2026"')
         self.assertContains(response, 'href="https://www.bizoach.com"')
+        self.assertNotContains(response, "Join BIZOACH Waitlist")
+        self.assertNotContains(response, "BIZOACH community and waitlist")
         self.assertRegex(
             content,
             r'href="https://www\.bizoach\.com"[^>]+target="_blank"[^>]+rel="noopener noreferrer"',
