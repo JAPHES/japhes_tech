@@ -216,6 +216,29 @@ class SeoTests(SimpleTestCase):
             content.index("<h4>Organizer</h4>"),
         )
 
+    def test_resume_includes_educloud_academy_ambassador_role(self):
+        response = self.client.get(reverse("techie:home"), **self.request_options)
+        content = response.content.decode()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "<h4>Ambassador</h4>", html=True)
+        self.assertContains(response, "<em>Educloud Academy</em>", html=True)
+        self.assertRegex(
+            content,
+            r"(?s)<h4>Ambassador</h4>.*?<em>Educloud Academy</em>.*?<h5>2026 - Present</h5>",
+        )
+        self.assertContains(response, "Promoting Cloud and AI learning opportunities")
+        self.assertContains(response, "help students develop practical technology skills")
+        self.assertContains(response, "a wider community of young technology builders")
+        self.assertLess(
+            content.index("<h4>Organizer</h4>"),
+            content.index("<em>Educloud Academy</em>"),
+        )
+        self.assertLess(
+            content.index("<em>Educloud Academy</em>"),
+            content.index("<h4>AWS Student Builder Group Leader</h4>"),
+        )
+
     def test_each_service_has_unique_metadata_content_and_structured_data(self):
         titles = set()
         descriptions = set()
