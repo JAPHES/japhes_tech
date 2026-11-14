@@ -9,7 +9,8 @@ application path `/home/ubuntu/japhestech` used by the included systemd unit.
 
 ## 1. Create and secure the EC2 instance
 
-1. Launch an Ubuntu EC2 instance and associate an Elastic IP so the public IP
+1. The current EC2 public IPv4 address is `13.48.27.36`. Confirm that it is an
+   Elastic IP, or associate an Elastic IP before switching DNS so the address
    does not change after a stop/start.
 2. Configure its security group with:
    - SSH (`22`) from your own public IP only.
@@ -39,9 +40,10 @@ Create a strong secret key:
 
 Copy the environment template and replace the value inside the existing single
 quotes on the `SECRET_KEY` line. The quotes prevent shell characters in the
-generated key from being interpreted when the file is sourced. If DNS is not
-pointing at EC2 yet, temporarily add the Elastic IP and EC2 public DNS name to
-`ALLOWED_HOSTS` as comma-separated values.
+generated key from being interpreted when the file is sourced. The current IP
+`13.48.27.36` is already included in `ALLOWED_HOSTS` and the HTTP CSRF origins
+for testing before the DNS switch. Add the EC2 public DNS name as well only if
+you plan to access the application through it.
 
 ```bash
 sudo cp deploy/aws/japhestech.env.example /etc/japhestech.env
@@ -81,15 +83,24 @@ Verify the app locally on the instance before changing DNS:
 ```bash
 curl --fail --header 'Host: japhes.secora.dev' http://127.0.0.1:8000/health/
 curl --fail --header 'Host: japhes.secora.dev' http://127.0.0.1/
+curl --fail http://13.48.27.36/health/
 ```
 
 The health response should be `{"status": "ok"}`.
 
 ## 4. Point the domain to EC2 and enable HTTPS
 
-Change the `japhes` DNS record from the Vercel target to an `A` record containing
-the EC2 Elastic IP. DNS selects which provider serves `japhes.secora.dev`; the
-Vercel deployment can remain available on its `*.vercel.app` URL.
+Change the `japhes` DNS record from the Vercel target to this record:
+
+```text
+Type: A
+Name/Host: japhes
+Value/Answer: 13.48.27.36
+TTL: 300
+```
+
+DNS selects which provider serves `japhes.secora.dev`; the Vercel deployment can
+remain available on its `*.vercel.app` URL.
 
 After the `A` record resolves to the EC2 Elastic IP:
 
@@ -113,6 +124,10 @@ Restart the app and verify it:
 sudo systemctl restart japhestech
 curl --fail https://japhes.secora.dev/health/
 ```
+
+After HTTPS and the domain are working, the temporary `http://13.48.27.36` CSRF
+origin can be removed from `/etc/japhestech.env`. Keeping the IP in
+`ALLOWED_HOSTS` is optional if you no longer need direct-IP testing.
 
 Keep `SECURE_HSTS_SECONDS=0` until HTTPS has been stable. It can later be raised
 carefully; HSTS is cached by browsers and is not immediately reversible.
