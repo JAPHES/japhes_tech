@@ -155,3 +155,13 @@ sudo journalctl -u japhestech -n 100 --no-pager
 sudo nginx -t
 sudo tail -n 100 /var/log/nginx/error.log
 ```
+
+If Django shows `DisallowedHost` for `13.48.27.36`, update the checked-out code
+and restart Gunicorn so it loads the IP-aware settings:
+
+```bash
+cd /home/ubuntu/japhestech
+git pull --ff-only origin master
+sudo systemctl restart japhestech
+curl --fail http://13.48.27.36/health/
+```

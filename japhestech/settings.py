@@ -28,6 +28,10 @@ VERCEL_URL = os.getenv("VERCEL_URL")
 if VERCEL_URL:
     ALLOWED_HOSTS.append(VERCEL_URL)
 
+EC2_PUBLIC_IP = os.getenv("EC2_PUBLIC_IP", "13.48.27.36").strip()
+if EC2_PUBLIC_IP and EC2_PUBLIC_IP not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(EC2_PUBLIC_IP)
+
 CANONICAL_HOST = os.getenv("CANONICAL_HOST", "japhes.secora.dev")
 CANONICAL_SITE_URL = f"https://{CANONICAL_HOST}"
 if CANONICAL_HOST not in ALLOWED_HOSTS:
@@ -120,6 +124,10 @@ if VERCEL_URL:
     vercel_origin = f"https://{VERCEL_URL}"
     if vercel_origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(vercel_origin)
+if EC2_PUBLIC_IP:
+    ec2_http_origin = f"http://{EC2_PUBLIC_IP}"
+    if ec2_http_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(ec2_http_origin)
 
 # Honor HTTPS information from trusted reverse proxies such as Nginx and Vercel.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

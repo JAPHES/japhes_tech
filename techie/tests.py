@@ -2,6 +2,7 @@ import json
 import re
 from xml.etree import ElementTree
 
+from django.conf import settings
 from django.test import SimpleTestCase, override_settings
 from django.urls import reverse
 
@@ -14,6 +15,17 @@ class SeoTests(SimpleTestCase):
     def test_health_check_is_available_for_host_monitoring(self):
         response = self.client.get(reverse("techie:health"), **self.request_options)
 
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok"})
+
+    def test_ec2_public_ip_is_allowed_for_direct_health_checks(self):
+        response = self.client.get(
+            reverse("techie:health"),
+            HTTP_HOST="13.48.27.36",
+        )
+
+        self.assertIn("13.48.27.36", settings.ALLOWED_HOSTS)
+        self.assertIn("http://13.48.27.36", settings.CSRF_TRUSTED_ORIGINS)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "ok"})
 
