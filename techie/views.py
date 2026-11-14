@@ -1,7 +1,7 @@
 import json
 
 from django.conf import settings
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -10,6 +10,11 @@ from .services import SERVICES, SERVICES_BY_SLUG
 
 def home(request):
     return render(request, "techie/index.html", {"services": SERVICES})
+
+
+def health_check(_request):
+    """Lightweight process health check for EC2/Nginx monitoring."""
+    return JsonResponse({"status": "ok"})
 
 
 def portfolio_details(request):

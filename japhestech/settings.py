@@ -3,10 +3,18 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-this-in-production")
 
-# Default DEBUG to True for local development; set DEBUG=false in production envs (e.g., Vercel)
-DEBUG = os.getenv("DEBUG", "True").lower() == "true"
+# Default DEBUG to True for local development; always set DEBUG=False on EC2/Vercel.
+DEBUG = env_bool("DEBUG", True)
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -112,5 +120,19 @@ if VERCEL_URL:
     vercel_origin = f"https://{VERCEL_URL}"
     if vercel_origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(vercel_origin)
+
+# Honor HTTPS information from trusted reverse proxies such as Nginx and Vercel.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = env_bool("USE_X_FORWARDED_HOST", True)
+
+# These switches are environment-controlled so EC2 can be tested over HTTP before
+# TLS is configured, then hardened without changing source code.
+SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", False)
+SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", not DEBUG)
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
+SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", False)
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

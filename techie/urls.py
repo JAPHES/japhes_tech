@@ -8,6 +8,7 @@ app_name = "techie"
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("health/", views.health_check, name="health"),
     path("robots.txt", views.robots_txt, name="robots_txt"),
     path(
         "sitemap.xml",

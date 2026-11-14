@@ -1,6 +1,6 @@
 # Japhestech Portfolio (Django 5)
 
-Personal portfolio site for Japhes Murithi - an IT Technician and Fullstack Developer. Built with Django and deployed on Vercel using Python serverless functions plus WhiteNoise for static files.
+Personal portfolio site for Japhes Murithi - an IT Technician and Fullstack Developer. Built with Django and deployable on both Vercel and AWS EC2.
 
 ## About
 Passionate IT Technician with deep faith, honesty, and diligence. Expert in solving complex problems with precision and efficiency, showcasing a keen eye for detail and adherence to instructions. My passion lies in creating impactful digital experiences across various platforms, combining technical expertise and creativity.
@@ -9,8 +9,8 @@ Passionate IT Technician with deep faith, honesty, and diligence. Expert in solv
 - Python / Django 5
 - WhiteNoise for static assets
 - Vercel serverless runtime (`@vercel/python`)
+- Gunicorn, systemd, and Nginx for AWS EC2
 - Bootstrap 5 for responsive UI
-- Swiper.js for carousels
 - AOS (Animate On Scroll) for animations
 
 ## Features
@@ -45,6 +45,9 @@ Passionate IT Technician with deep faith, honesty, and diligence. Expert in solv
   - `ALLOWED_HOSTS=japhes.secora.dev,japhestech.vercel.app,.vercel.app`
   - `CSRF_TRUSTED_ORIGINS=https://japhes.secora.dev,https://japhestech.vercel.app,https://*.vercel.app`
 
+The existing `vercel.json` remains supported. Adding EC2 deployment files does
+not change the Vercel build or runtime.
+
 ### Custom domain
 
 The production portfolio uses `japhes.secora.dev`. Add this domain to the Vercel project, then create the CNAME record requested by Vercel in the `secora.dev` DNS zone:
@@ -53,6 +56,17 @@ The production portfolio uses `japhes.secora.dev`. Add this domain to the Vercel
 - Name/Host: `japhes`
 - Value/Answer: the exact CNAME target shown by Vercel
 - TTL: `300`
+
+## Deployment (AWS EC2)
+
+The repository includes a production EC2 path using Gunicorn behind Nginx, a
+systemd service, environment-based HTTPS security controls, and a lightweight
+`/health/` endpoint. Follow the complete guide in
+[`deploy/aws/README.md`](deploy/aws/README.md).
+
+Both Vercel and EC2 can run the same commit. DNS determines which deployment
+serves `japhes.secora.dev`; keep the Vercel configuration until the EC2 site has
+been verified and you are ready to switch the domain's DNS record.
 
 ## Recent Updates
 - ✨ Redesigned about section with new professional identity

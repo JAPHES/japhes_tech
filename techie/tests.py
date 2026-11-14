@@ -11,6 +11,27 @@ from .services import SERVICES
 class SeoTests(SimpleTestCase):
     request_options = {"HTTP_HOST": "localhost"}
 
+    def test_health_check_is_available_for_host_monitoring(self):
+        response = self.client.get(reverse("techie:health"), **self.request_options)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok"})
+
+    @override_settings(
+        DEBUG=False,
+        ALLOWED_HOSTS=["japhes.secora.dev"],
+        SECURE_SSL_REDIRECT=True,
+    )
+    def test_health_check_accepts_forwarded_https_from_ec2_nginx(self):
+        response = self.client.get(
+            reverse("techie:health"),
+            HTTP_HOST="japhes.secora.dev",
+            HTTP_X_FORWARDED_PROTO="https",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok"})
+
     def test_home_has_search_and_social_metadata(self):
         response = self.client.get(reverse("techie:home"), **self.request_options)
 
